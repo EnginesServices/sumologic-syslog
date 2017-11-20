@@ -15,8 +15,84 @@
         "level": "alpha",
         "patch": 0
       }
-    }
+    },
+    "software": {
+      "display": {
+        "title": "SumoLogic Syslog",
+        "label": "syslog"
+      }
+    },
+    "timestamp": "2017-11-20T13:21:15+11:00"
   },
   "software": {
+    "base": {
+      "name": "syslog",
+      "publisher_namespace": "SumoLogic",
+      "type_path": "SumoLogic",
+      "service_handle_field": "parent_engine",
+      "parent_image": "engines/sumologic",
+      "run_as_user": "syslog",
+      "deployment_type": "worker",
+      "memory": {
+        "required": 168,
+        "recommended": 180
+      },
+      "persistent": true
+    },
+    "ports": [
+      {
+        "port": "514",
+        "external": "514",
+        "protocol": "tcp_and_udp"
+      }
+    ],
+    "constants": [
+      {
+        "name": "collector_name",
+        "value": "syslog"
+      }
+    ],
+    "template_files": [
+      {
+        "path": "/home/sumo-sources.json",
+        "language": "sh",
+        "content": "{\r\n  \"api.version\": \"v1\",\r\n  \"sources\": [\r\n    { \r\n      \"sourceType\": \"Syslog\",\r\n       \"category\": \"syslog\",      \r\n      \"name\": \"syslog-collector-container-tcp\",\r\n      \"port\": 514,\r\n      \"protocol\": \"TCP\",\r\n      \"encoding\": \"UTF-8\",\r\n      \"forceTimeZone\": false,\r\n      \"category\": \"collector-container\"\r\n    },\r\n    { \r\n      \"sourceType\": \"Syslog\",\r\n       \"category\": \"syslog\",      \r\n      \"name\": \"syslog-collector-container-udp\",\r\n      \"port\": 514,\r\n      \"protocol\": \"UDP\",\r\n      \"encoding\": \"UTF-8\",\r\n      \"forceTimeZone\": false,\r\n      \"category\": \"collector-container\"\r\n    }\r\n\t]\r\n}"
+      }
+    ],
+    "configurators": [
+      {
+        "name": "collector_credentials",
+        "label": "Collector Credentials",
+        "enable_logging": true,
+        "variables": [
+          {
+            "name": "access_id",
+            "mandatory": true,
+            "input": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "access_key",
+            "mandatory": true,
+            "input": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "collector_name",
+            "input": {
+              "type": "string",
+              "label": "Collector Name",
+              "title": "Defaults to service_name"
+            }
+          }
+        ],
+        "set_script": {
+          "language": "sh",
+          "content": "#!/bin/bash\r\n\r\ncat - >/home/engines/scripts/configurators/saved/credentials\r\n. /home/engines/functions/params_to_env.sh\r\nPARAMS_FILE=/home/engines/scripts/configurators/saved/credentials\r\nparms_to_file_and_env\r\nexit 0\r\n"
+        }
+      }
+    ]
   }
 }
